@@ -19,9 +19,25 @@ def load_file():
     with open(expense_file, "r") as file:
         return json.load(file)
 
-def save_file(expense):
+def save_file(expenses):
     with open(expense_file, "w") as file:
-        json.dump(expense, file, indent=4)
+        json.dump(expenses, file, indent=4)
+        
+def list_expenses():
+    expenses = load_file()
+
+    try:
+        if not expenses:
+            print("No expenses.")
+        else:
+            for index, expense in enumerate(expenses, start=1):
+                print("List of all expenses:")
+                print(f"{index}. {expense['description']}.")
+                print(f"Amount: {expense['amount']}")
+    except FileNotFoundError:
+        print("File not found")
+    except json.JSONDecodeError:
+        print("Wrong json format")
 
 def add_expense(desc, amount):
     expenses = load_file()
@@ -56,12 +72,18 @@ def main():
         required=True,
         help="Enter amount of expense"
         )
+    
+    # list subparser
+    list_subparser = subparser.add_parser("list", help="List all expenses")
 
     # then store all that parsers in args variable untuk kita call nanti
     args = parser.parse_args()
 
     if args.command == "add":
         add_expense(args.desc, args.amount)
+    elif args.command == "list":
+        list_expenses()
+        
     else:
         parser.print_help()
 
