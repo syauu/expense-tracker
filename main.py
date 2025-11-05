@@ -52,8 +52,8 @@ def add_expense(desc, amount):
     }
 
     expenses.append(new_expenses)
-
     save_file(expenses)
+    print(f"Expense {new_expenses['description']} added successfully. (RM{new_expenses['amount']})")
 
 def delete_expense(id):
     if id is None:
@@ -73,6 +73,23 @@ def delete_expense(id):
         print("Please enter valid number")
     except IndexError:
         print("No expense found")
+
+def summary(month):
+    expenses = load_file()
+    total = 0
+    if not expenses:
+        print("No expenses.")
+
+    current_year = datetime.now().year
+    for expense in expenses:
+        expense_obj = datetime.strptime(expense["date"], "%d-%m-%Y, %H:%M:%S")
+        if expense_obj.year == current_year:
+            if month == None:
+                total = total + expense["amount"]
+            elif expense_obj.month == month:
+                total = total + expense["amount"]
+
+    print(f"Total expense: RM{total}")
 
 def main():
     parser = argparse.ArgumentParser(description="Expenses Tracker CLI") # first kita create parser object
@@ -102,8 +119,16 @@ def main():
     delete_subparser = subparser.add_parser("delete", help="Delete an expense")
     delete_subparser.add_argument(
         "-i", "--id",
-        type=int,
+        type=int, 
         help="Enter expense id to delete"
+    )
+
+    # summary subparser
+    summary_subparser = subparser.add_parser("summary", help="Summary of total expenses for current year")
+    summary_subparser.add_argument(
+        "-m", "--month",
+        type=int,
+        help="Enter month (number)"
     )
 
     # then store all that parsers in args variable untuk kita call nanti
@@ -115,6 +140,8 @@ def main():
         list_expenses()
     elif args.command == "delete":
         delete_expense(args.id)
+    elif args.command == "summary":
+        summary(args.month)
     else:
         parser.print_help()
 
